@@ -1,0 +1,24 @@
+[package]
+name = "tauri-app"
+version = "0.1.0"
+license = "Apache-2.0"
+edition = "2021"
+
+[build_dependencies.tauri-build]
+version = "1.4"
+features = []
+
+[dependencies]
+serde_json = "1.0"
+
+[dependencies.tauri]
+version = "1.4"
+features = ["shell-open"]
+
+[dependencies.serde]
+version = "1.0"
+features = ["derive"]
+
+[features]
+# DO NOT REMOVE | Tauri required feature
+custom-protocol = ["tauri/custom-protocol"]

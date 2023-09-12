@@ -1,2 +1,6 @@
 target/
 Cargo.lock
+dist/
+bin/
+node_modules/
+pnpm-lock.yaml
