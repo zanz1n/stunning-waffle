@@ -1,18 +1,18 @@
 #![no_std]
 #![no_main]
 
+mod max6675;
 mod messaging;
 mod utils;
 
 use cortex_m::delay::Delay;
 use defmt_rtt as _;
 use embedded_hal::digital::v2::OutputPin;
-use embedded_hal::prelude::_embedded_hal_adc_OneShot;
+use max6675::{TemperatureSensor, MAX6675};
 use messaging::Payload;
 use panic_probe as _;
 use rp2040_hal::{
-    adc::AdcPin, clocks::init_clocks_and_plls, gpio::Pins, pac, usb::UsbBus, Adc, Clock, Sio,
-    Watchdog,
+    clocks::init_clocks_and_plls, gpio::Pins, pac, usb::UsbBus, Clock, Sio, Watchdog,
 };
 use serde_json_core::to_slice;
 use usb_device::{
@@ -58,7 +58,7 @@ fn main() -> ! {
 
     let mut serial = SerialPort::new(&usb_bus);
 
-    let usb_dev = UsbDeviceBuilder::new(&usb_bus, UsbVidPid(0x16c0, 0x27dd))
+    let mut usb_dev = UsbDeviceBuilder::new(&usb_bus, UsbVidPid(0x16c0, 0x27dd))
         .manufacturer("Fake company")
         .product("Serial port")
         .serial_number("TEST")
@@ -66,7 +66,7 @@ fn main() -> ! {
         .build();
 
     let delay = Delay::new(core.SYST, clocks.system_clock.freq().to_Hz());
-    let mut delay = DelayProvider::new(delay, usb_dev);
+    let delay = DelayProvider::new(delay);
 
     let pins = Pins::new(
         pac.IO_BANK0,
@@ -75,16 +75,19 @@ fn main() -> ! {
         &mut pac.RESETS,
     );
 
-    let mut buildin_led = pins.gpio25.into_push_pull_output();
+    let mut led_pin = pins.gpio25.into_push_pull_output();
 
-    let mut buffer: [u8; 2048] = [0; 2048];
+    let mut sensor1 = MAX6675::new(
+        pins.gpio2.into_push_pull_output(),
+        pins.gpio3.into_push_pull_output(),
+        pins.gpio4.into_pull_up_input(),
+        &delay,
+    );
 
-    let mut adc = Adc::new(pac.ADC, &mut pac.RESETS);
-
-    let mut sensor1_in = AdcPin::new(pins.gpio26.into_floating_input());
+    let mut buffer: [u8; 1024] = [0; 1024];
 
     loop {
-        let value: u16 = adc.read(&mut sensor1_in).unwrap();
+        let value = sensor1.read_celsius();
 
         let written_pos = to_slice(
             &Payload {
@@ -99,10 +102,27 @@ fn main() -> ! {
 
         _ = serial.write(&buffer);
 
-        buildin_led.set_high().unwrap();
-        delay.sleep_ms(500, &mut [&mut serial]);
-        buildin_led.set_low().unwrap();
-        delay.sleep_ms(500, &mut [&mut serial]);
+        {
+            let mut ms = 500;
+            while ms > 0 {
+                ms -= 8;
+                delay.delay_ms(8);
+                usb_dev.poll(&mut [&mut serial]);
+            }
+        }
+
+        led_pin.set_high().unwrap();
+
+        {
+            let mut ms = 500;
+            while ms > 0 {
+                ms -= 8;
+                delay.delay_ms(8);
+                usb_dev.poll(&mut [&mut serial]);
+            }
+        }
+
+        led_pin.set_low().unwrap();
 
         clear_slice(&mut buffer);
     }

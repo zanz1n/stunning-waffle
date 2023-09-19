@@ -1,7 +1,7 @@
 use serde::{ser::SerializeStruct, Serialize};
 
 pub struct Payload {
-    pub temperature_1: u16,
+    pub temperature_1: f32,
 }
 
 impl Serialize for Payload {
