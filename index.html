@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ens">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8" />
@@ -10,7 +10,15 @@
 </head>
 
 <body>
-    <h1>Hello World</h1>
+    <div id="app">
+        <span>Tamanho: </span>
+        <input type="number" name="size" id="canvas_size">
+        |
+        <span>Modo performance: </span>
+        <input type="checkbox" name="size" id="performance_mode">
+        <canvas id="graph"></canvas>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
 </body>
 
 </html>
