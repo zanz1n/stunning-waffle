@@ -3,11 +3,11 @@
 mod messaging;
 mod state_machine;
 
-use state_machine::StateMachine;
+use state_machine::StateStorage;
 
 fn main() {
     let state_manager =
-        StateMachine::new("/dev/ttyACM0", 115_200).expect("Failed to connect to serial console");
+        StateStorage::new("/dev/ttyACM0", 9600).expect("Failed to connect to serial console");
 
     tauri::Builder::default()
         .plugin(tauri_plugin_log::Builder::default().build())

@@ -7,13 +7,13 @@ use std::{
 };
 use tauri::{App, AppHandle, Manager};
 
-pub struct StateMachine {
+pub struct StateStorage {
     port: Box<dyn SerialPort>,
     cache: Vec<Option<Payload>>,
 }
 
-impl StateMachine {
-    // Default baud rate: 115200
+impl StateStorage {
+    /// Default baud rate: 115200
     pub fn new(path: &str, baud_rate: u32) -> Result<Self, serialport::Error> {
         let port = serialport::new(path, baud_rate)
             .timeout(Duration::from_millis(2000))

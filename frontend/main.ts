@@ -44,5 +44,5 @@ setInterval(() => {
 }, 700);
 
 listen("data_push", function (evt) {
-    chart.append((evt.payload as Record<string, number>)["Temperature 1"]);
+    chart.append((evt.payload as Record<string, number>)["temperature_1"]);
 });
