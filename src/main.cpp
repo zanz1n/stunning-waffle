@@ -59,7 +59,7 @@ void setup()
     pinMode(PIN_POWER_BTN, INPUT);
     pinMode(PIN_ON_LED, OUTPUT);
 
-    Serial.begin(9600);
+    Serial.begin(921600);
 
     lcd.init();
     lcd.setBacklight(0x1);
@@ -102,7 +102,7 @@ char *temperature_display_watts(Temperature t)
     case Temperature::T400:
         return " 400w";
     case Temperature::T800:
-        return "800w";
+        return " 800w";
     case Temperature::T1000:
         return "1000w";
     case Temperature::T1300:
@@ -145,28 +145,65 @@ inline void adjust_heater()
     set_temperature(INIT_SET_TEMPERATURE);
 }
 
+float celcius;
+
+const char *celcius_str = "1024.000000000000000000000000000";
+char *lcd_line1 = "Heater          ";
+char *watts_cache = " 120w";
+char *lcd_line2 = "H:       S:     ";
+char *json_str = "{\"temperature_1\":       }";
+
+String string(1024.78);
+
 void submit_metrics()
 {
-    float celcius = termocouple.readCelsius();
+    celcius = termocouple.readCelsius();
+    string = String(celcius, 5);
+    celcius_str = string.c_str();
 
-    lcd.clear();
-    lcd.setCursor(0, 0);
+    watts_cache = temperature_display_watts(current_temp);
+
+    lcd_line1[11] = watts_cache[0];
+    lcd_line1[12] = watts_cache[1];
+    lcd_line1[13] = watts_cache[2];
+    lcd_line1[14] = watts_cache[3];
+    lcd_line1[15] = watts_cache[4];
 
     if (turned_on)
-        lcd.print("Heater ON  ");
+    {
+        lcd_line1[7] = 'O';
+        lcd_line1[8] = 'N';
+    }
     else
-        lcd.print("Heater OFF ");
+    {
+        lcd_line1[7] = 'O';
+        lcd_line1[8] = 'F';
+        lcd_line1[9] = 'F';
+    }
 
-    lcd.print(temperature_display_watts(current_temp));
+    lcd_line2[2] = celcius_str[0],
+    lcd_line2[3] = celcius_str[1];
+    lcd_line2[4] = celcius_str[2];
+    lcd_line2[5] = celcius_str[3];
+    lcd_line2[6] = celcius_str[4];
+
+    json_str[17] = celcius_str[0];
+    json_str[18] = celcius_str[1];
+    json_str[19] = celcius_str[2];
+    json_str[20] = celcius_str[3];
+    json_str[21] = celcius_str[4];
+    json_str[22] = celcius_str[5];
+    json_str[23] = celcius_str[6];
+
+    lcd.clear();
+
+    lcd.setCursor(0, 0);
+    lcd.print(lcd_line1);
 
     lcd.setCursor(0, 1);
-    lcd.print(String("H: ") + String(celcius, 1));
-    lcd.print("  ");
-    lcd.print(String("S: ") + String(celcius, 1));
+    lcd.print(lcd_line2);
 
-    String json_str = String("{\"temperature_1\":" + String(celcius, DEC) + "}");
-
-    Serial.println(json_str.c_str());
+    Serial.println(json_str);
 }
 
 void change_power_state()
