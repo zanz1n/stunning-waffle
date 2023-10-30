@@ -151,7 +151,7 @@ const char *celcius_str = "1024.000000000000000000000000000";
 char *lcd_line1 = "Heater          ";
 char *watts_cache = " 120w";
 char *lcd_line2 = "H:       S:     ";
-char *json_str = "{\"temperature_1\":       }";
+char *json_str = "{\"temperature_1\":       }\r\n";
 
 String string(1024.78);
 
@@ -203,7 +203,7 @@ void submit_metrics()
     lcd.setCursor(0, 1);
     lcd.print(lcd_line2);
 
-    Serial.println(json_str);
+    Serial.write(json_str);
 }
 
 void change_power_state()
