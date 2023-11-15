@@ -26,8 +26,8 @@ enum Temperature : uint8_t
 #define PIN_TERMC_CS 9
 #define PIN_TERMC_MISO 10
 
-#define PIN_POWER_BTN 11
-#define PIN_ON_LED 13
+#define PIN_POWER_BTN 13
+#define PIN_ON_LED 12
 
 #define PIN_H_RELE_ON_DELAY 2000
 #define PIN_H_RELE_OFF_DELAY 1000
@@ -98,21 +98,21 @@ char *temperature_display_watts(Temperature t)
     switch (t)
     {
     case Temperature::T120:
-        return " 120w";
+        return " 120W";
     case Temperature::T400:
-        return " 400w";
+        return " 400W";
     case Temperature::T800:
-        return " 800w";
+        return " 800W";
     case Temperature::T1000:
-        return "1000w";
+        return "1000W";
     case Temperature::T1300:
-        return "1300w";
+        return "1300W";
     case Temperature::T1600:
-        return "1600w";
+        return "1600W";
     case Temperature::T1800:
-        return "1800w";
+        return "1800W";
     case Temperature::T2000:
-        return "2000w";
+        return "2000W";
     }
 }
 
@@ -173,6 +173,7 @@ void submit_metrics()
     {
         lcd_line1[7] = 'O';
         lcd_line1[8] = 'N';
+        lcd_line1[9] = ' ';
     }
     else
     {
@@ -186,6 +187,12 @@ void submit_metrics()
     lcd_line2[4] = celcius_str[2];
     lcd_line2[5] = celcius_str[3];
     lcd_line2[6] = celcius_str[4];
+
+    lcd_line2[11] = celcius_str[0],
+    lcd_line2[12] = celcius_str[1];
+    lcd_line2[13] = celcius_str[2];
+    lcd_line2[14] = celcius_str[3];
+    lcd_line2[15] = celcius_str[4];
 
     json_str[17] = celcius_str[0];
     json_str[18] = celcius_str[1];
